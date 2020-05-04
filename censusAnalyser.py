@@ -13,12 +13,17 @@ class StateCensusAnalyser:
     '''
 
     def __init__(self, censusdatafile):
-        target_path =  os.path.join(os.path.dirname(__file__), censusdatafile)
-        print(target_path)
-        return pd.read_csv(target_path)
+        try:
+
+            __target_path =  os.path.join(os.path.dirname(__file__), censusdatafile)
+            print(__target_path)
+            return pd.read_csv(__target_path,delimiter=';')
+            
+        except FileNotFoundError as e:
+            raise FileTypeNotCorrectException
 
 class StateCodeAnalyser:
-    
+
     '''
 
     Create a StateCodeAnalyser class to load the State code CSV Data
@@ -26,14 +31,17 @@ class StateCodeAnalyser:
     '''
 
     def __init__(self, statefile):
-        target_path =  os.path.join(os.path.dirname(__file__), statefile)
-        print(target_path)
-        self.stateCode = pd.read_csv(target_path)
-        return self.stateCode
+        try:
+            
+            __target_path =  os.path.join(os.path.dirname(__file__), statefile)
+            print(__target_path)
+            return pd.read_csv(__target_path)
+
+        except FileNotFoundError as e:
+            raise FileTypeNotCorrectException
 
 
-
-class CSVStateCensus(StateCensusAnalyser,StateCodeAnalyser):
+class _CSVStateCensus(StateCensusAnalyser,StateCodeAnalyser):
     
     '''
 
@@ -48,19 +56,29 @@ class CSVStateCensus(StateCensusAnalyser,StateCodeAnalyser):
     Check with StateCensusAnalyserto ensure number of record matches
 
     '''
-    def getNumberofrecordes_censusdata(self,censusdatafile):
-        self.csv_data = StateCensusAnalyser.__init__(self,censusdatafile)
-        return len(self.csv_data)
+    def getNumberofrecordes_censusdata(self,__censusdatafile):
+        self.__csv_data = 0
+        try:
+            self.__csv_data = StateCensusAnalyser.__init__(self,__censusdatafile)
+        except FileNotFoundError :
+            raise FileNotCorrectException
+        return len(self.__csv_data)
 
-    def getNumberofrecordes_statecode(self,statecodefile):
-        self.stateCode = StateCodeAnalyser.__init__(self,statecodefile)
-        return len(self.stateCode)
+    def getNumberofrecordes_statecode(self,__statecodefile):
+        self.__statecode = 0
+        try:
+            self.__statecode = StateCodeAnalyser.__init__(self,__statecodefile)
+        except FileNotFoundError :
+            raise FileNotCorrectException
+        return len(self.__statecode)
 
 if __name__ == "__main__" :
 
-    correctFilepath = 'StateCensusData.csv'
-    wrongFilepath = 'StateCode.csv'
-    Sca = CSVStateCensus()
+    # if input('do u want to specify file (y or n)').__contains__(['y','Y']):
+    #     correctFilepath = input('enter file name: ')
+    __correctFilepath = 'StateCensusData.csv'
+    __wrongFilepath = 'StateCode.csv'
+    Sca = _CSVStateCensus()
     # print(CSVStateCensus().mro())
-    print(Sca.getNumberofrecordes_censusdata(correctFilepath))
-    print(Sca.getNumberofrecordes_statecode(statecodefile=wrongFilepath))
+    print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
+    print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
