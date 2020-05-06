@@ -107,22 +107,30 @@ class _CSVStateCensus(StateCensusAnalyser,StateCodeAnalyser):
 class __StateSensusHandler(_CSVStateCensus):
 
     def __init__(self, *args, **kwargs):
-        pass
+        import inspect
 
     '''
     Save the State Census Data into a Json File
     '''
 
-    def to_stateCensusjsondata(self,__filename):
-        self.__csv_dataframe = StateCensusAnalyser.__init__(self,__filename)
-        # self.__csv_dataframe = self.sort_statesDataInAlphabeticalOrder(self.__csv_dataframe)
-        return self.__csv_dataframe.reset_index().to_json(r'StateCensusJsonData.json',orient='records')
+    def __to_stateCensusjsondata(self,__filename):
+        self.__censusdataframe = StateCensusAnalyser.__init__(self,__filename)
+        sortedStatecesusData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(self.__censusdataframe)
+        return sortedStatecesusData.reset_index().to_json(r'StateCensusJsonData.json',orient='records')
     
-    def to_stateCodejsondata(self,__filename):
-        self.__csv_dataframe = StateCodeAnalyser.__init__(self,__filename)
-        # self.__csv_dataframe = self.sort_statesDataInAlphabeticalOrder(self.__csv_dataframe)
-        return self.__csv_dataframe.reset_index().to_json(r'StateCodeJsondata.json',orient='records')
+    def __to_stateCodejsondata(self,__filename):
+        self.__statecodedataframe = StateCodeAnalyser.__init__(self,__filename)
+        sortedStatecodeData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(self.__statecodedataframe)
+        return sortedStatecodeData.reset_index().to_json(r'StateCodeJsondata.json',orient='records')
     
+    def Sorting_statesCensusDataInAlphabeticalOrder(self):
+        print('State Census Data')
+        return self.sort_statesDataInAlphabeticalOrder(self.__censusdataframe).to_json()
+
+    def Sorting_statesCodeDataInAlphabeticalOrder(self):
+        print('State Code Data')
+        return self.sort_statesDataInAlphabeticalOrder(self.__statecodedataframe).to_json()
+
     '''
 
     Create a Sorting function in the Analyser to
@@ -136,14 +144,19 @@ class __StateSensusHandler(_CSVStateCensus):
         Among other things, this makes it possible to get the name of the current function or callers. Handy for logging or debugging purposes. 
 
         '''
-        import inspect
-        if inspect.stack()[1][3]  is 'to_stateCensusjsondata' :
+        
+        if inspect.stack()[1][3]  is 'Sorting_statesCensusDataInAlphabeticalOrder' :
             return data.sort_values(by=['State'])
-        elif inspect.stack()[1][3]  is 'to_stateCodejsondata' :
+        elif inspect.stack()[1][3]  is 'Sorting_statesCodeDataInAlphabeticalOrder' :
             return data.sort_values(by=['StateCode'])
-        return 'check the method type again'
+        return 'check the method  again'
     
-    
+    def __sort_statesDataInAlphabeticalOrdertojsonfile(self,data):
+        
+        if inspect.stack()[1][3]  is '__to_stateCensusjsondata' :
+            return data.sort_values(by=['DensityPerSqKm'])
+        return 'check the method  again'
+
 if __name__ == "__main__" :
 
     # if input('do u want to specify file (y or n)').__contains__(['y','Y']):
