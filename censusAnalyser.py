@@ -155,6 +155,8 @@ class __StateSensusHandler(_CSVStateCensus):
         
         if inspect.stack()[1][3]  is '__to_stateCensusjsondata' :
             return data.sort_values(by=['DensityPerSqKm'])
+        elif inspect.stack()[1][3]  is '__to_stateCodejsondata' :
+            return data.sort_values(by=['StateCode'])
         return 'check the method  again'
 
 if __name__ == "__main__" :
