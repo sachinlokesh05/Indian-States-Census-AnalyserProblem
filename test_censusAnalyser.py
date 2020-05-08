@@ -1,5 +1,5 @@
 import pytest
-from censusAnalyser import CSVStateCensus as csvdata
+from censusAnalyser import _CSVStateCensus as csvdata
 from censusAnalyserException import *
 
 '''
@@ -67,6 +67,13 @@ def test_Given_the_State_Code_CSV_File_if_incorrect_Returns_a_custom_Exception_T
 Given the State Code CSV File when correct but type incorrect Returns a custom Exception
 
 '''
+@pytest.mark.xfail(raises=FileTypeNotCorrectException)
+def test_Given_the_State_Census_CSV_File_when_correct_but_type_incorrect_Returns_a_custom_Exception_TC_2_3():
+    wrongFiletype = 'StateCode.txt'
+
+    # with pytest.raises(FileNotFoundError):
+    csvdata().getNumberofrecordes_statecode(wrongFiletype)
+
 @pytest.mark.xfail(raises=FileTypeNotCorrectException)
 def test_Given_the_State_Census_CSV_File_when_correct_but_type_incorrect_Returns_a_custom_Exception_TC_2_3():
     wrongFiletype = 'StateCode.txt'

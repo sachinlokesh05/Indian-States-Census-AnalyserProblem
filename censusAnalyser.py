@@ -23,6 +23,8 @@ class StateCensusAnalyser:
         except FileNotFoundError as e:
             raise FileTypeNotCorrectException
         
+    def __str__(self):
+        return str(self.__class__)
 
 class StateCodeAnalyser:
 
@@ -42,6 +44,8 @@ class StateCodeAnalyser:
         except FileNotFoundError as e:
             raise FileTypeNotCorrectException
 
+    def __str__(self):
+        return str(self.__class__)
 
 class _CSVStateCensus(StateCensusAnalyser,StateCodeAnalyser):
     
@@ -111,12 +115,33 @@ class __StateSensusHandler(_CSVStateCensus):
 
     def to_stateCensusjsondata(self,__filename):
         self.__csv_dataframe = StateCensusAnalyser.__init__(self,__filename)
-        return self.__csv_dataframe.reset_index().to_json(r'StateCensusData.json',orient='records')
+        # self.__csv_dataframe = self.sort_statesDataInAlphabeticalOrder(self.__csv_dataframe)
+        return self.__csv_dataframe.reset_index().to_json(r'StateCensusJsonData.json',orient='records')
     
     def to_stateCodejsondata(self,__filename):
         self.__csv_dataframe = StateCodeAnalyser.__init__(self,__filename)
+        # self.__csv_dataframe = self.sort_statesDataInAlphabeticalOrder(self.__csv_dataframe)
         return self.__csv_dataframe.reset_index().to_json(r'StateCodeJsondata.json',orient='records')
     
+    '''
+
+    Create a Sorting function in the Analyser to
+    Sort the States in the alphabetical order
+
+    '''
+    def sort_statesDataInAlphabeticalOrder(self,data):
+        '''
+
+        With the python module inspect, one can inspect (not kidding) the run-time python stack. 
+        Among other things, this makes it possible to get the name of the current function or callers. Handy for logging or debugging purposes. 
+
+        '''
+        import inspect
+        if inspect.stack()[1][3]  is 'to_stateCensusjsondata' :
+            return data.sort_values(by=['State'])
+        elif inspect.stack()[1][3]  is 'to_stateCodejsondata' :
+            return data.sort_values(by=['StateCode'])
+        return 'check the method type again'
     
     
 if __name__ == "__main__" :
@@ -131,5 +156,5 @@ if __name__ == "__main__" :
     # print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
     # # print(Sca.to_jsondata(__correctFilepath))
     # print(Sca.iterator(__correctFilepath))
-    __StateSensusHandler().to_stateCensusjsondata(__wrongFilepath)
-    __StateSensusHandler().to_stateCodejsondata(__correctFilepath)
+    __StateSensusHandler().to_stateCensusjsondata(__correctFilepath)
+    __StateSensusHandler().to_stateCodejsondata(__wrongFilepath)
