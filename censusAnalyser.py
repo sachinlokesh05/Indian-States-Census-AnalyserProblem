@@ -106,22 +106,24 @@ class _CSVStateCensus(StateCensusAnalyser,StateCodeAnalyser):
 
 class __StateSensusHandler(_CSVStateCensus):
     
-    def __init__(self, *args, **kwargs):
-        pass
+    def __init__(self, censusfilename,codefilename):
+        global __censusdataframe 
+        __censusdataframe = StateCensusAnalyser.__init__(self,censusfilename)
+        global  __statecodedataframe
+        __statecodedataframe = StateCodeAnalyser.__init__(self,codefilename)
+
     '''
     Save the State Census Data into a Json File
     '''
 
-    def to_stateCensusjsondata(self,__filename):
-        global __censusdataframe 
-        __censusdataframe = StateCensusAnalyser.__init__(self,__filename)
+    def to_stateCensusjsondata(self):
+        
         print(__censusdataframe)
         sortedStatecesusData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(data=__censusdataframe)
         return sortedStatecesusData
     
-    def to_stateCodejsondata(self,__filename):
-        global  __statecodedataframe
-        __statecodedataframe = StateCodeAnalyser.__init__(self,__filename)
+    def to_stateCodejsondata(self):
+        
         sortedStatecodeData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(__statecodedataframe)
         return sortedStatecodeData
 
@@ -189,8 +191,9 @@ if __name__ == "__main__" :
     print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
     print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
     print(Sca.iterator(__correctFilepath))
-    __StateSensusHandler().to_stateCensusjsondata(__correctFilepath)
-    __StateSensusHandler().to_stateCodejsondata(__wrongFilepath)
-    __StateSensusHandler().Sorting_statesCensusDataOnArea()
-    __StateSensusHandler().Sorting_statesCensusDataOnopulationDensity()
-    __StateSensusHandler().Sorting_statesCodeDataInAlphabeticalOrder()
+    ss = __StateSensusHandler(__correctFilepath,__wrongFilepath)
+    ss.to_stateCensusjsondata()
+    ss.to_stateCodejsondata()
+    ss.Sorting_statesCensusDataOnArea()
+    ss.Sorting_statesCensusDataOnopulationDensity()
+    ss.Sorting_statesCodeDataInAlphabeticalOrder()
