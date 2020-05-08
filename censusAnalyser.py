@@ -144,7 +144,6 @@ class __StateSensusHandler(_CSVStateCensus):
     '''
 
     def Sorting_statesCensusDataInAlphabeticalOrder(self):
-        print('State Census Data')
         # __censusdataframe = StateCensusAnalyser.__init__(self,__filename)
         return self.__sort_statesDataInAlphabeticalOrder(__censusdataframe).to_json()
 
@@ -159,7 +158,6 @@ class __StateSensusHandler(_CSVStateCensus):
     '''
 
     def Sorting_statesCodeDataInAlphabeticalOrder(self):
-        print('State Code Data')
         # __statecodedataframe = StateCodeAnalyser.__init__(self,__filename)
         return self.__sort_statesDataInAlphabeticalOrder(__statecodedataframe).to_json()
     
@@ -172,11 +170,13 @@ class __StateSensusHandler(_CSVStateCensus):
         '''
         import inspect
         try:
-            if inspect.stack()[1][3]  is 'Sorting_statesCensusDataInAlphabeticalOrder' :
+            if inspect.stack()[1][3]  == 'Sorting_statesCensusDataInAlphabeticalOrder' :
                 return data.sort_values(by=['State'])
-            elif inspect.stack()[1][3]  is 'Sorting_statesCodeDataInAlphabeticalOrder' :
+            elif inspect.stack()[1][3]  == 'Sorting_statesCodeDataInAlphabeticalOrder' :
                 return data.sort_values(by=['StateCode'])
-            
+            else:
+                return "check the method again"
+
         except FileNotFoundError:
             FileNotCorrectException
 
@@ -185,6 +185,7 @@ class __StateSensusHandler(_CSVStateCensus):
 
     def __sort_statesDataInAlphabeticalOrdertojsonfile(self,data):
         import inspect
+
         try:
             '''
             Ability to report the State
@@ -193,7 +194,7 @@ class __StateSensusHandler(_CSVStateCensus):
             populous state to the
             least one
             '''
-            if inspect.stack()[1][3]  is 'to_stateCensusjsondata' :
+            if inspect.stack()[1][3]  == 'to_stateCensusjsondata' :
                 return data.sort_values(by=['State'],ascending=False).reset_index().to_json(r'StateCensusJsonData.json',orient='records')
 
             '''
@@ -203,7 +204,7 @@ class __StateSensusHandler(_CSVStateCensus):
             Largest State by DensityPerSqKm to
             the smallest state
             '''
-            elif inspect.stack()[1][3]  is 'Sorting_statesCensusDataOnopulationDensity' :
+            if inspect.stack()[1][3]  == 'Sorting_statesCensusDataOnArea' :
                 return data.sort_values(by=['DensityPerSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonPopulationDensity.json',orient='records')
 
             '''
@@ -213,24 +214,27 @@ class __StateSensusHandler(_CSVStateCensus):
             Largest State by Area to
             the smallest state
             '''
-            elif inspect.stack()[1][3]  is 'Sorting_statesCensusDataOnArea' :
+            if inspect.stack()[1][3]  == 'Sorting_statesCensusDataOnArea' :
                 return data.sort_values(by=['AreaInSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonArea.json',orient='records')
 
             '''
             Ability to report the
-            State Census Data in a
+            StateC ode Data in a
             Json File from most
             population density
             state to the least one
             '''
-            elif inspect.stack()[1][3]  is 'to_stateCodejsondata' :
+            if inspect.stack()[1][3]  == 'to_stateCodejsondata' :
                 return data.sort_values(by=['StateCode']).reset_index().to_json(r'StateCodeJsondata.json',orient='records')
+
+            else:
+                return "check the method again"
 
         except FileNotFoundError :
             raise FileNotCorrectException
 
         except FileExistsError :
-            FileTypeNotCorrectException
+            raise FileTypeNotCorrectException
 
 if __name__ == "__main__" :
 
@@ -239,13 +243,10 @@ if __name__ == "__main__" :
     __correctFilepath = 'StateCensusData.csv'
     __wrongFilepath = 'StateCode.csv'
     Sca = _CSVStateCensus()
-    print(__StateSensusHandler.mro())
-    print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
-    print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
-    print(Sca.iterator(__correctFilepath))
+    # print(__StateSensusHandler.mro())
+    # print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
+    # print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
+    # print(Sca.iterator(__correctFilepath))
     ss = __StateSensusHandler(censusfilename=__correctFilepath,codefilename=__wrongFilepath)
-    ss.to_stateCensusjsondata()
-    ss.to_stateCodejsondata()
     ss.Sorting_statesCensusDataOnArea()
     ss.Sorting_statesCensusDataOnopulationDensity()
-    ss.Sorting_statesCodeDataInAlphabeticalOrder()
