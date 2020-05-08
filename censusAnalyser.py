@@ -105,57 +105,136 @@ class _CSVStateCensus(StateCensusAnalyser,StateCodeAnalyser):
         return iterator_list
 
 class __StateSensusHandler(_CSVStateCensus):
-
-    def __init__(self, *args, **kwargs):
-        import inspect
+    
+    def __init__(self, censusfilename,codefilename):
+        global __censusdataframe 
+        __censusdataframe = StateCensusAnalyser.__init__(self,censusfilename)
+        global  __statecodedataframe
+        __statecodedataframe = StateCodeAnalyser.__init__(self,codefilename)
 
     '''
     Save the State Census Data into a Json File
     '''
 
-    def __to_stateCensusjsondata(self,__filename):
-        self.__censusdataframe = StateCensusAnalyser.__init__(self,__filename)
-        sortedStatecesusData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(self.__censusdataframe)
-        return sortedStatecesusData.reset_index().to_json(r'StateCensusJsonData.json',orient='records')
+    def to_stateCensusjsondata(self):
+        
+        print(__censusdataframe)
+        sortedStatecesusData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(data=__censusdataframe)
+        return sortedStatecesusData
     
-    def __to_stateCodejsondata(self,__filename):
-        self.__statecodedataframe = StateCodeAnalyser.__init__(self,__filename)
-        sortedStatecodeData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(self.__statecodedataframe)
-        return sortedStatecodeData.reset_index().to_json(r'StateCodeJsondata.json',orient='records')
-    
+    def to_stateCodejsondata(self):
+        
+        sortedStatecodeData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(__statecodedataframe)
+        return sortedStatecodeData
+
+    def Sorting_statesCensusDataOnopulationDensity(self):
+        return self.__sort_statesDataInAlphabeticalOrdertojsonfile(__censusdataframe)
+
+    def Sorting_statesCensusDataOnArea(self):
+        return self.__sort_statesDataInAlphabeticalOrdertojsonfile(__censusdataframe)
+
+    '''
+
+    Ability for Analyser to
+    report the State Census
+    Data in a Json Format
+    according to State
+    alphabetical order
+
+    '''
+
     def Sorting_statesCensusDataInAlphabeticalOrder(self):
-        print('State Census Data')
-        return self.sort_statesDataInAlphabeticalOrder(self.__censusdataframe).to_json()
+        # __censusdataframe = StateCensusAnalyser.__init__(self,__filename)
+        return self.__sort_statesDataInAlphabeticalOrder(__censusdataframe).to_json()
+
+    '''
+
+    Ability for Analyser to
+    report the State Census
+    Data in a Json Format as
+    per State Code in an
+    alphabetical order
+
+    '''
 
     def Sorting_statesCodeDataInAlphabeticalOrder(self):
-        print('State Code Data')
-        return self.sort_statesDataInAlphabeticalOrder(self.__statecodedataframe).to_json()
-
-    '''
-
-    Create a Sorting function in the Analyser to
-    Sort the States in the alphabetical order
-
-    '''
-    def sort_statesDataInAlphabeticalOrder(self,data):
+        # __statecodedataframe = StateCodeAnalyser.__init__(self,__filename)
+        return self.__sort_statesDataInAlphabeticalOrder(__statecodedataframe).to_json()
+    
+    def __sort_statesDataInAlphabeticalOrder(self,data):
         '''
 
         With the python module inspect, one can inspect (not kidding) the run-time python stack. 
         Among other things, this makes it possible to get the name of the current function or callers. Handy for logging or debugging purposes. 
 
         '''
-        
-        if inspect.stack()[1][3]  is 'Sorting_statesCensusDataInAlphabeticalOrder' :
-            return data.sort_values(by=['State'])
-        elif inspect.stack()[1][3]  is 'Sorting_statesCodeDataInAlphabeticalOrder' :
-            return data.sort_values(by=['StateCode'])
-        return 'check the method  again'
-    
+        import inspect
+        try:
+            if inspect.stack()[1][3]  == 'Sorting_statesCensusDataInAlphabeticalOrder' :
+                return data.sort_values(by=['State'])
+            elif inspect.stack()[1][3]  == 'Sorting_statesCodeDataInAlphabeticalOrder' :
+                return data.sort_values(by=['StateCode'])
+            else:
+                return "check the method again"
+
+        except FileNotFoundError:
+            FileNotCorrectException
+
+        except FileExistsError :
+            FileTypeNotCorrectException
+
     def __sort_statesDataInAlphabeticalOrdertojsonfile(self,data):
-        
-        if inspect.stack()[1][3]  is '__to_stateCensusjsondata' :
-            return data.sort_values(by=['DensityPerSqKm'])
-        return 'check the method  again'
+        import inspect
+
+        try:
+            '''
+            Ability to report the State
+            Census Data in a Json
+            Format from most
+            populous state to the
+            least one
+            '''
+            if inspect.stack()[1][3]  == 'to_stateCensusjsondata' :
+                return data.sort_values(by=['State'],ascending=False).reset_index().to_json(r'StateCensusJsonData.json',orient='records')
+
+            '''
+            Ability to report the
+            State Census Data in a
+            Json format from
+            Largest State by DensityPerSqKm to
+            the smallest state
+            '''
+            if inspect.stack()[1][3]  == 'Sorting_statesCensusDataOnArea' :
+                return data.sort_values(by=['DensityPerSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonPopulationDensity.json',orient='records')
+
+            '''
+            Ability to report the
+            State Census Data in a
+            Json format from
+            Largest State by Area to
+            the smallest state
+            '''
+            if inspect.stack()[1][3]  == 'Sorting_statesCensusDataOnArea' :
+                return data.sort_values(by=['AreaInSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonArea.json',orient='records')
+
+            '''
+            Ability to report the
+            StateC ode Data in a
+            Json File from most
+            population density
+            state to the least one
+            '''
+            if inspect.stack()[1][3]  == 'to_stateCodejsondata' :
+                return data.sort_values(by=['StateCode']).reset_index().to_json(r'StateCodeJsondata.json',orient='records')
+
+            else:
+                return "check the method again"
+
+        except FileNotFoundError :
+            raise FileNotCorrectException
+
+        except FileExistsError :
+            raise FileTypeNotCorrectException
 
 if __name__ == "__main__" :
 
@@ -167,7 +246,7 @@ if __name__ == "__main__" :
     # print(__StateSensusHandler.mro())
     # print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
     # print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
-    # # print(Sca.to_jsondata(__correctFilepath))
     # print(Sca.iterator(__correctFilepath))
-    __StateSensusHandler().to_stateCensusjsondata(__correctFilepath)
-    __StateSensusHandler().to_stateCodejsondata(__wrongFilepath)
+    ss = __StateSensusHandler(censusfilename=__correctFilepath,codefilename=__wrongFilepath)
+    ss.Sorting_statesCensusDataOnArea()
+    ss.Sorting_statesCensusDataOnopulationDensity()
