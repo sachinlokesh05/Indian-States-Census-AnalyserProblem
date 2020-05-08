@@ -133,23 +133,37 @@ class __StateSensusHandler(_CSVStateCensus):
     def Sorting_statesCensusDataOnArea(self):
         return self.__sort_statesDataInAlphabeticalOrdertojsonfile(__censusdataframe)
 
+    '''
+
+    Ability for Analyser to
+    report the State Census
+    Data in a Json Format
+    according to State
+    alphabetical order
+
+    '''
+
     def Sorting_statesCensusDataInAlphabeticalOrder(self):
         print('State Census Data')
         # __censusdataframe = StateCensusAnalyser.__init__(self,__filename)
-        return self.sort_statesDataInAlphabeticalOrder(__censusdataframe).to_json()
+        return self.__sort_statesDataInAlphabeticalOrder(__censusdataframe).to_json()
+
+    '''
+
+    Ability for Analyser to
+    report the State Census
+    Data in a Json Format as
+    per State Code in an
+    alphabetical order
+
+    '''
 
     def Sorting_statesCodeDataInAlphabeticalOrder(self):
         print('State Code Data')
         # __statecodedataframe = StateCodeAnalyser.__init__(self,__filename)
-        return self.sort_statesDataInAlphabeticalOrder(__statecodedataframe).to_json()
-
-    '''
-
-    Create a Sorting function in the Analyser to
-    Sort the States in the alphabetical order
-
-    '''
-    def sort_statesDataInAlphabeticalOrder(self,data):
+        return self.__sort_statesDataInAlphabeticalOrder(__statecodedataframe).to_json()
+    
+    def __sort_statesDataInAlphabeticalOrder(self,data):
         '''
 
         With the python module inspect, one can inspect (not kidding) the run-time python stack. 
@@ -157,28 +171,66 @@ class __StateSensusHandler(_CSVStateCensus):
 
         '''
         import inspect
+        try:
+            if inspect.stack()[1][3]  is 'Sorting_statesCensusDataInAlphabeticalOrder' :
+                return data.sort_values(by=['State'])
+            elif inspect.stack()[1][3]  is 'Sorting_statesCodeDataInAlphabeticalOrder' :
+                return data.sort_values(by=['StateCode'])
+            
+        except FileNotFoundError:
+            FileNotCorrectException
 
-        if inspect.stack()[1][3]  is 'Sorting_statesCensusDataInAlphabeticalOrder' :
-            return data.sort_values(by=['State'])
-        elif inspect.stack()[1][3]  is 'Sorting_statesCodeDataInAlphabeticalOrder' :
-            return data.sort_values(by=['StateCode'])
-        return 'check the method  again'
-    
+        except FileExistsError :
+            FileTypeNotCorrectException
+
     def __sort_statesDataInAlphabeticalOrdertojsonfile(self,data):
         import inspect
+        try:
+            '''
+            Ability to report the State
+            Census Data in a Json
+            Format from most
+            populous state to the
+            least one
+            '''
+            if inspect.stack()[1][3]  is 'to_stateCensusjsondata' :
+                return data.sort_values(by=['State'],ascending=False).reset_index().to_json(r'StateCensusJsonData.json',orient='records')
 
-        if inspect.stack()[1][3]  is 'to_stateCensusjsondata' :
-            return data.sort_values(by=['State'],ascending=False).reset_index().to_json(r'StateCensusJsonData.json',orient='records')
+            '''
+            Ability to report the
+            State Census Data in a
+            Json format from
+            Largest State by DensityPerSqKm to
+            the smallest state
+            '''
+            elif inspect.stack()[1][3]  is 'Sorting_statesCensusDataOnopulationDensity' :
+                return data.sort_values(by=['DensityPerSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonPopulationDensity.json',orient='records')
 
-        elif inspect.stack()[1][3]  is 'Sorting_statesCensusDataOnopulationDensity' :
-            return data.sort_values(by=['DensityPerSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonPopulationDensity.json',orient='records')
+            '''
+            Ability to report the
+            State Census Data in a
+            Json format from
+            Largest State by Area to
+            the smallest state
+            '''
+            elif inspect.stack()[1][3]  is 'Sorting_statesCensusDataOnArea' :
+                return data.sort_values(by=['AreaInSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonArea.json',orient='records')
 
-        elif inspect.stack()[1][3]  is 'Sorting_statesCensusDataOnArea' :
-            return data.sort_values(by=['AreaInSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonArea.json',orient='records')
+            '''
+            Ability to report the
+            State Census Data in a
+            Json File from most
+            population density
+            state to the least one
+            '''
+            elif inspect.stack()[1][3]  is 'to_stateCodejsondata' :
+                return data.sort_values(by=['StateCode']).reset_index().to_json(r'StateCodeJsondata.json',orient='records')
 
-        elif inspect.stack()[1][3]  is 'to_stateCodejsondata' :
-            return data.sort_values(by=['StateCode']).reset_index().to_json(r'StateCodeJsondata.json',orient='records')
-        return 'check the method  again'
+        except FileNotFoundError :
+            raise FileNotCorrectException
+
+        except FileExistsError :
+            FileTypeNotCorrectException
 
 if __name__ == "__main__" :
 
@@ -191,7 +243,7 @@ if __name__ == "__main__" :
     print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
     print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
     print(Sca.iterator(__correctFilepath))
-    ss = __StateSensusHandler(__correctFilepath,__wrongFilepath)
+    ss = __StateSensusHandler(censusfilename=__correctFilepath,codefilename=__wrongFilepath)
     ss.to_stateCensusjsondata()
     ss.to_stateCodejsondata()
     ss.Sorting_statesCensusDataOnArea()
