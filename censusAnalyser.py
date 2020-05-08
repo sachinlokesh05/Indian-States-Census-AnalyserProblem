@@ -105,31 +105,41 @@ class _CSVStateCensus(StateCensusAnalyser,StateCodeAnalyser):
         return iterator_list
 
 class __StateSensusHandler(_CSVStateCensus):
-
+    
     def __init__(self, *args, **kwargs):
-        import inspect
-
+        pass
     '''
     Save the State Census Data into a Json File
     '''
 
-    def __to_stateCensusjsondata(self,__filename):
-        self.__censusdataframe = StateCensusAnalyser.__init__(self,__filename)
-        sortedStatecesusData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(self.__censusdataframe)
-        return sortedStatecesusData.reset_index().to_json(r'StateCensusJsonData.json',orient='records')
+    def to_stateCensusjsondata(self,__filename):
+        global __censusdataframe 
+        __censusdataframe = StateCensusAnalyser.__init__(self,__filename)
+        print(__censusdataframe)
+        sortedStatecesusData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(data=__censusdataframe)
+        return sortedStatecesusData
     
-    def __to_stateCodejsondata(self,__filename):
-        self.__statecodedataframe = StateCodeAnalyser.__init__(self,__filename)
-        sortedStatecodeData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(self.__statecodedataframe)
-        return sortedStatecodeData.reset_index().to_json(r'StateCodeJsondata.json',orient='records')
-    
+    def to_stateCodejsondata(self,__filename):
+        global  __statecodedataframe
+        __statecodedataframe = StateCodeAnalyser.__init__(self,__filename)
+        sortedStatecodeData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(__statecodedataframe)
+        return sortedStatecodeData
+
+    def Sorting_statesCensusDataOnopulationDensity(self):
+        return self.__sort_statesDataInAlphabeticalOrdertojsonfile(__censusdataframe)
+
+    def Sorting_statesCensusDataOnArea(self):
+        return self.__sort_statesDataInAlphabeticalOrdertojsonfile(__censusdataframe)
+
     def Sorting_statesCensusDataInAlphabeticalOrder(self):
         print('State Census Data')
-        return self.sort_statesDataInAlphabeticalOrder(self.__censusdataframe).to_json()
+        # __censusdataframe = StateCensusAnalyser.__init__(self,__filename)
+        return self.sort_statesDataInAlphabeticalOrder(__censusdataframe).to_json()
 
     def Sorting_statesCodeDataInAlphabeticalOrder(self):
         print('State Code Data')
-        return self.sort_statesDataInAlphabeticalOrder(self.__statecodedataframe).to_json()
+        # __statecodedataframe = StateCodeAnalyser.__init__(self,__filename)
+        return self.sort_statesDataInAlphabeticalOrder(__statecodedataframe).to_json()
 
     '''
 
@@ -144,7 +154,8 @@ class __StateSensusHandler(_CSVStateCensus):
         Among other things, this makes it possible to get the name of the current function or callers. Handy for logging or debugging purposes. 
 
         '''
-        
+        import inspect
+
         if inspect.stack()[1][3]  is 'Sorting_statesCensusDataInAlphabeticalOrder' :
             return data.sort_values(by=['State'])
         elif inspect.stack()[1][3]  is 'Sorting_statesCodeDataInAlphabeticalOrder' :
@@ -152,11 +163,19 @@ class __StateSensusHandler(_CSVStateCensus):
         return 'check the method  again'
     
     def __sort_statesDataInAlphabeticalOrdertojsonfile(self,data):
-        
-        if inspect.stack()[1][3]  is '__to_stateCensusjsondata' :
-            return data.sort_values(by=['DensityPerSqKm'])
-        elif inspect.stack()[1][3]  is '__to_stateCodejsondata' :
-            return data.sort_values(by=['StateCode'])
+        import inspect
+
+        if inspect.stack()[1][3]  is 'to_stateCensusjsondata' :
+            return data.sort_values(by=['State'],ascending=False).reset_index().to_json(r'StateCensusJsonData.json',orient='records')
+
+        elif inspect.stack()[1][3]  is 'Sorting_statesCensusDataOnopulationDensity' :
+            return data.sort_values(by=['DensityPerSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonPopulationDensity.json',orient='records')
+
+        elif inspect.stack()[1][3]  is 'Sorting_statesCensusDataOnArea' :
+            return data.sort_values(by=['AreaInSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonArea.json',orient='records')
+
+        elif inspect.stack()[1][3]  is 'to_stateCodejsondata' :
+            return data.sort_values(by=['StateCode']).reset_index().to_json(r'StateCodeJsondata.json',orient='records')
         return 'check the method  again'
 
 if __name__ == "__main__" :
@@ -166,10 +185,12 @@ if __name__ == "__main__" :
     __correctFilepath = 'StateCensusData.csv'
     __wrongFilepath = 'StateCode.csv'
     Sca = _CSVStateCensus()
-    # print(__StateSensusHandler.mro())
-    # print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
-    # print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
-    # # print(Sca.to_jsondata(__correctFilepath))
-    # print(Sca.iterator(__correctFilepath))
+    print(__StateSensusHandler.mro())
+    print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
+    print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
+    print(Sca.iterator(__correctFilepath))
     __StateSensusHandler().to_stateCensusjsondata(__correctFilepath)
     __StateSensusHandler().to_stateCodejsondata(__wrongFilepath)
+    __StateSensusHandler().Sorting_statesCensusDataOnArea()
+    __StateSensusHandler().Sorting_statesCensusDataOnopulationDensity()
+    __StateSensusHandler().Sorting_statesCodeDataInAlphabeticalOrder()
