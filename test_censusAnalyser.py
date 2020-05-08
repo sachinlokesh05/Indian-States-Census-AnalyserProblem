@@ -1,5 +1,5 @@
 import pytest
-from censusAnalyser import CSVStateCensus as csvdata
+from censusAnalyser import _CSVStateCensus as csvdata
 from censusAnalyserException import *
 
 '''
