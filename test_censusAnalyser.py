@@ -1,5 +1,5 @@
 import pytest
-from censusAnalyser import _CSVStateCensus as csvdata
+from censusAnalyser import _CSVStateCensus as csvdata,__StateSensusHandler as handler
 from censusAnalyserException import *
 
 '''
@@ -80,6 +80,81 @@ def test_Given_the_State_Census_CSV_File_when_correct_but_type_incorrect_Returns
 
     # with pytest.raises(FileNotFoundError):
     csvdata().getNumberofrecordes_statecode(wrongFiletype)
+    
+
+'''
+
+For Test Case to pass check the start and end states of State CensusData in a Json Format asper State Census in an alphabetical order
+
+'''
+def test_to_pass_check_the_start_and_end_statestion_TC_3_1():
+    censusfile = 'StateCensusData.csv'
+    codefile = 'StateCode.csv'
+    starting_state,ending_state = handler(censusfile,codefile).Check_statecensusurecords()
+
+    assert starting_state == 'Andhra Pradesh' and ending_state == 'West Bengal'
+
+
+'''
+
+For Test Case to pass check the particular state of State CensusData in a Json Format asper State Census in an alphabetical order
+
+'''
+def test_to_pass_check_the_particular_state_TC_3_2():
+    censusfile = 'StateCensusData.csv'
+    codefile = 'StateCode.csv'
+    state = 'Kerala'
+    starting_state = handler(censusfile,codefile).Check_statecensusurecords(state=state)
+
+    assert starting_state == 12
+
+
+'''
+
+For Test Case to pass check the start and end states of State Code Data in a Json Format asper State Code in an alphabetical order
+
+'''
+def test_to_pass_check_the_start_and_end_statestion_TC_4_1():
+    censusfile = 'StateCensusData.csv'
+    codefile = 'StateCode.csv'
+    starting_state,ending_state = handler(censusfile,codefile).Check_statecoderecords()
+
+    assert starting_state == 'AD' and ending_state == 'WB'
+
+
+'''
+
+For Test Case to pass check the particular state of State Code Data in a Json Format asper State Code in an alphabetical order
+
+'''
+def test_to_pass_check_the_particular_state_TC_4_2():
+    censusfile = 'StateCensusData.csv'
+    codefile = 'StateCode.csv'
+    state = 'KA'
+    starting_state = handler(censusfile,codefile).Check_statecoderecords(state=state)
+
+    assert starting_state == 17
+
+
+'''
+
+For Test Case to pass report Number of States Count Before Sorting and Number of States Count After Sorting
+
+'''
+def test_For_Test_Case_to_pass_report_number_of_states_sorted_TC_5_1():
+    censusfile = 'StateCensusData.csv'
+    codefile = 'StateCode.csv'
+    
+    ''' Number of States Count Before Sorting'''
+    numberOfStatesBeforeSorting = csvdata().getNumberofrecordes_censusdata(censusfile)
+
+    ''' Number of States Count After Sorting''' 
+    numberOfStatesAfterSorting = handler(censusfile,codefile).check_recordsCountAfterSorted()
+
+    
+    assert numberOfStatesAfterSorting == numberOfStatesBeforeSorting
+
+
 
 if __name__ == "__main__":
     pytest.main()
