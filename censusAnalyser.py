@@ -133,6 +133,24 @@ class __StateSensusHandler(_CSVStateCensus):
     def Sorting_statesCensusDataOnArea(self):
         return self.__sort_statesDataInAlphabeticalOrdertojsonfile(__censusdataframe)
 
+    def Check_statecoderecords(self,state=None):
+        data = json.loads(self.Sorting_statesCodeDataInAlphabeticalOrder())
+        State_list = list(data.get('StateCode').values())
+        if state:
+            return State_list.index(str(state))
+        return State_list[0],State_list[len(State_list)-1] 
+
+    def Check_statecensusurecords(self,state=None):
+        data = json.loads(self.Sorting_statesCensusDataInAlphabeticalOrder())
+        State_list = list(data.get('State').values())
+        if state:
+            return State_list.index(str(state))
+        return State_list[0],State_list[len(State_list)-1]
+
+    def check_recordsCountAfterSorted(self):
+        return len(self.Sorting_statesCensusDataOnopulationDensity())
+    
+        
     '''
 
     Ability for Analyser to
@@ -204,9 +222,9 @@ class __StateSensusHandler(_CSVStateCensus):
             Largest State by DensityPerSqKm to
             the smallest state
             '''
-            if inspect.stack()[1][3]  == 'Sorting_statesCensusDataOnArea' :
-                return data.sort_values(by=['DensityPerSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonPopulationDensity.json',orient='records')
-
+            if inspect.stack()[1][3]  == 'Sorting_statesCensusDataOnopulationDensity' :
+                data.sort_values(by=['DensityPerSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonPopulationDensity.json',orient='records')
+                return data.sort_values(by=['DensityPerSqKm'],ascending=False)
             '''
             Ability to report the
             State Census Data in a
@@ -215,8 +233,8 @@ class __StateSensusHandler(_CSVStateCensus):
             the smallest state
             '''
             if inspect.stack()[1][3]  == 'Sorting_statesCensusDataOnArea' :
-                return data.sort_values(by=['AreaInSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonArea.json',orient='records')
-
+                data.sort_values(by=['AreaInSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonArea.json',orient='records')
+                return data.sort_values(by=['AreaInSqKm'],ascending=False)
             '''
             Ability to report the
             StateC ode Data in a
@@ -244,9 +262,12 @@ if __name__ == "__main__" :
     __wrongFilepath = 'StateCode.csv'
     Sca = _CSVStateCensus()
     # print(__StateSensusHandler.mro())
-    # print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
+    print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
     # print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
     # print(Sca.iterator(__correctFilepath))
     ss = __StateSensusHandler(censusfilename=__correctFilepath,codefilename=__wrongFilepath)
-    ss.Sorting_statesCensusDataOnArea()
-    ss.Sorting_statesCensusDataOnopulationDensity()
+    # ss.Sorting_statesCensusDataOnArea()
+    # print(ss.Sorting_statesCensusDataOnopulationDensity())
+    # print(ss.Check_statecensusurecords())
+    # print(ss.Check_statecoderecords())
+    print(ss.check_recordsCountAfterSorted())
