@@ -11,3 +11,5 @@ class FileNotCorrectException(CensusException):
 
 class FileTypeNotCorrectException(CensusException):
     pass
+class CsvFileHeaderException(CensusException):
+    pass

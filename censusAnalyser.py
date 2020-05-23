@@ -6,26 +6,7 @@ import os
 import json
 from censusAnalyserException import *
 from pandas.errors import ParserWarning,ParserError
-import re
-class daoBaseClass(object):
-    
-    def __init__(self,columnList):
-        
-        if re.search(r'(StateName|StatesName|State|StateNames)',str(columnList)):
-            self.State = columnList
-        elif re.search(r'(StateCode|StatesCode|StateCodes|StatesCodes)',str(columnList)):
-            self.StateCode = columnList  
-        elif re.search(r'(Population|population)',str(columnList)):
-            self.population = columnList
-        elif columnList.__contains__(r'[A|a]rea*'):
-            self.area = columnList
-        # if columnList['StateName'] or columnList['State'] or columnList['States'] :  self.State = columnList 
-        # if columnList[r'[P|p]opulation*'] : self.population = columnList
-        # if columnList[r'[A|a]rea*'] :  self.area = columnList
-
-    def getColumn(self):
-        column = self.State if self.State else (self.population if self.population else self.area )
-        return column
+from daoBaseClass import daoBaseClass
 
 class StateCensusAnalyser:
     '''
@@ -207,8 +188,9 @@ class __StateSensusHandler(_CSVStateCensus):
 
         '''
         try:
+            column_data = daoBaseClass(column).getColumn()
             # if inspect.stack()[1][3]  == 'Sorting_statesCensusDataInAlphabeticalOrder' :
-            return data.sort_values(by=[column])
+            return data.sort_values(by=column_data)
             # return "check the method again"
 
         except FileNotFoundError:
@@ -220,17 +202,16 @@ class __StateSensusHandler(_CSVStateCensus):
     def __sort_statesDataInAlphabeticalOrdertojsonfile(self,data,column,to_filename):
         try:
             column_data = daoBaseClass(column).getColumn()
-            print(column_data)
-            print(type(column_data))
             data.sort_values(by=column_data,ascending=True).reset_index().to_json(to_filename,orient='records')
             return data.sort_values(by=column,ascending=True)
-
         except FileNotFoundError :
             raise FileNotCorrectException
 
         except FileExistsError :
             raise FileTypeNotCorrectException
 
+        except CsvFileHeaderException :
+            raise CsvFileHeaderException
     def mapping(self):
         # Read the files into two dataframes.
         df1 = __censusdataframe
@@ -269,6 +250,7 @@ class __StateSensusHandler(_CSVStateCensus):
  
         newDf.to_csv('abc.csv',index=False)
         return newDf
+
 if __name__ == "__main__" :
 
     # if input('do u want to specify file (y or n)').__contains__(['y','Y']):
@@ -277,17 +259,19 @@ if __name__ == "__main__" :
     __correctFilepath = 'StateCensusData.csv'
     __wrongFilepath = 'StateCode.csv'
     Sca = _CSVStateCensus()
-    # # # print(__StateSensusHandler.mro())
-    # # print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
-    # # # print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
-    # # # print(Sca.iterator(__correctFilepath))
+    print(__StateSensusHandler.mro())
+    print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
+    print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
+    print(Sca.iterator(__correctFilepath))
     ss = __StateSensusHandler(censusfilename=__correctFilepath,codefilename=__wrongFilepath)
     print(ss.Sorting_statesCensusDataOnopulationDensity())
-    # print(ss.Check_statecensusurecords())
-    # print(ss.Check_statecoderecords())
-    # print(ss.check_recordsCountAfterSorted())
-    # print(ss.mapping())
+    print(ss.Sorting_statesCensusDataOnArea())
+
+    print(ss.Check_statecensusurecords())
+    print(ss.Check_statecoderecords())
+    print(ss.check_recordsCountAfterSorted())
+    print(ss.mapping())
     print(ss.to_stateCensusjsondata())
     print(ss.to_stateCodejsondata())
-    # print(ss.Sorting_statesCensusDataInAlphabeticalOrder())
-    # print(ss.Sorting_statesCodeDataInAlphabeticalOrder())
+    print(ss.Sorting_statesCensusDataInAlphabeticalOrder())
+    print(ss.Sorting_statesCodeDataInAlphabeticalOrder())

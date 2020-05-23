@@ -1,0 +1,30 @@
+State,Population,AreaInSqKm,DensityPerSqKm,SrNo,StateName,TIN,StateCode
+Uttar Pradesh,199812341,240928.0,828.0,35,Uttar Pradesh,9,UP
+Maharashtra,112372972,307713.0,365.0,22,Maharashtra,27,MH
+Bihar,103804637,94163.0,1102.0,6,Bihar,10,BH
+West Bengal,91347736,88752.0,1029.0,37,West Bengal,19,WB
+Madhya Pradesh,72597565,308245.0,236.0,21,Madhya Pradesh,23,MP
+Tamil Nadu,72138958,130058.0,555.0,32,Tamil Nadu,33,TN
+Rajasthan,68621012,342239.0,201.0,30,Rajasthan,8,RJ
+Karnataka,61130704,191791.0,319.0,18,Karnataka,29,KA
+Gujarat,60383628,196024.0,308.0,13,Gujarat,24,GJ
+Andhra Pradesh,49386799,162968.0,303.0,2,Andhra Pradesh,28,AP
+Odisha,41947358,155707.0,269.0,27,Odisha,21,OR
+Telangana,35286757,114840.0,307.0,33,Telangana,36,TS
+Kerala,33387677,38863.0,859.0,19,Kerala,32,KL
+Jharkhand,32966238,79714.0,414.0,17,Jharkhand,20,JH
+Assam,31169272,78438.0,397.0,5,Assam,18,AS
+Punjab,27704236,50362.0,550.0,29,Punjab,3,PB
+Chattisgarh,25540196,135191.0,189.0,8,Chattisgarh,22,CT
+Haryana,25353081,44212.0,573.0,14,Haryana,6,HR
+Jammu and Kashmir,12548926,222236.0,57.0,16,Jammu and Kashmir,1,JK
+Uttarakhand,10116752,53483.0,189.0,36,Uttarakhand,5,UT
+Himachal Pradesh,6864602,55673.0,123.0,15,Himachal Pradesh,2,HP
+Tripura,3671032,10486.0,350.0,34,Tripura,16,TR
+Meghalaya,2964007,22429.0,132.0,24,Meghalaya,17,ME
+Manipur,2721756,22327.0,122.0,23,Manipur,14,MN
+Nagaland,1980602,16579.0,119.0,26,Nagaland,13,NL
+Goa,1457723,3702.0,394.0,12,Goa,30,GA
+Arunachal Pradesh,1382611,,,4,Arunachal Pradesh,12,AR
+Mizoram,1091014,21081.0,52.0,25,Mizoram,15,MI
+Sikkim,607688,7096.0,86.0,31,Sikkim,11,SK
