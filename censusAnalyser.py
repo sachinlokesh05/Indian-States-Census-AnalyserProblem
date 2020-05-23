@@ -6,6 +6,26 @@ import os
 import json
 from censusAnalyserException import *
 from pandas.errors import ParserWarning,ParserError
+import re
+class daoBaseClass(object):
+    
+    def __init__(self,columnList):
+        
+        if re.search(r'(StateName|StatesName|State|StateNames)',str(columnList)):
+            self.State = columnList
+        elif re.search(r'(StateCode|StatesCode|StateCodes|StatesCodes)',str(columnList)):
+            self.StateCode = columnList  
+        elif re.search(r'(Population|population)',str(columnList)):
+            self.population = columnList
+        elif columnList.__contains__(r'[A|a]rea*'):
+            self.area = columnList
+        # if columnList['StateName'] or columnList['State'] or columnList['States'] :  self.State = columnList 
+        # if columnList[r'[P|p]opulation*'] : self.population = columnList
+        # if columnList[r'[A|a]rea*'] :  self.area = columnList
+
+    def getColumn(self):
+        column = self.State if self.State else (self.population if self.population else self.area )
+        return column
 
 class StateCensusAnalyser:
     '''
@@ -107,6 +127,7 @@ class _CSVStateCensus(StateCensusAnalyser,StateCodeAnalyser):
 class __StateSensusHandler(_CSVStateCensus):
     
     def __init__(self, censusfilename,codefilename):
+        global newDf # indian census and indian state code merged dataframe
         global __censusdataframe 
         __censusdataframe = StateCensusAnalyser.__init__(self,censusfilename)
         global  __statecodedataframe
@@ -118,20 +139,19 @@ class __StateSensusHandler(_CSVStateCensus):
 
     def to_stateCensusjsondata(self):
         
-        print(__censusdataframe)
-        sortedStatecesusData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(data=__censusdataframe)
+        sortedStatecesusData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(data=__censusdataframe,column=['State'],to_filename=r'StateCensusJsondata.json')
         return sortedStatecesusData
     
     def to_stateCodejsondata(self):
         
-        sortedStatecodeData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(__statecodedataframe)
+        sortedStatecodeData = self.__sort_statesDataInAlphabeticalOrdertojsonfile(data=__statecodedataframe,column=['StateCode'],to_filename=r'StateCodeJsondata.json')
         return sortedStatecodeData
 
     def Sorting_statesCensusDataOnopulationDensity(self):
-        return self.__sort_statesDataInAlphabeticalOrdertojsonfile(__censusdataframe)
+        return self.__sort_statesDataInAlphabeticalOrdertojsonfile(data=__censusdataframe,column=['DensityPerSqKm'],to_filename=r'StateCensusSortedonPopulationDensity.json')
 
     def Sorting_statesCensusDataOnArea(self):
-        return self.__sort_statesDataInAlphabeticalOrdertojsonfile(__censusdataframe)
+        return self.__sort_statesDataInAlphabeticalOrdertojsonfile(data=__censusdataframe,column=['AreaInSqKm'],to_filename=r'StateCensusSortedonArea.json')
 
     def Check_statecoderecords(self,state=None):
         data = json.loads(self.Sorting_statesCodeDataInAlphabeticalOrder())
@@ -148,7 +168,7 @@ class __StateSensusHandler(_CSVStateCensus):
         return State_list[0],State_list[len(State_list)-1]
 
     def check_recordsCountAfterSorted(self):
-        return len(self.Sorting_statesCensusDataOnopulationDensity())
+        return self.Sorting_statesCensusDataOnopulationDensity()
     
         
     '''
@@ -163,7 +183,7 @@ class __StateSensusHandler(_CSVStateCensus):
 
     def Sorting_statesCensusDataInAlphabeticalOrder(self):
         # __censusdataframe = StateCensusAnalyser.__init__(self,__filename)
-        return self.__sort_statesDataInAlphabeticalOrder(__censusdataframe).to_json()
+        return self.__sort_statesDataInAlphabeticalOrder(__censusdataframe,column='State').to_json()
 
     '''
 
@@ -177,23 +197,19 @@ class __StateSensusHandler(_CSVStateCensus):
 
     def Sorting_statesCodeDataInAlphabeticalOrder(self):
         # __statecodedataframe = StateCodeAnalyser.__init__(self,__filename)
-        return self.__sort_statesDataInAlphabeticalOrder(__statecodedataframe).to_json()
+        return self.__sort_statesDataInAlphabeticalOrder(__statecodedataframe,column="StateCode").to_json()
     
-    def __sort_statesDataInAlphabeticalOrder(self,data):
+    def __sort_statesDataInAlphabeticalOrder(self,data,column):
         '''
 
         With the python module inspect, one can inspect (not kidding) the run-time python stack. 
         Among other things, this makes it possible to get the name of the current function or callers. Handy for logging or debugging purposes. 
 
         '''
-        import inspect
         try:
-            if inspect.stack()[1][3]  == 'Sorting_statesCensusDataInAlphabeticalOrder' :
-                return data.sort_values(by=['State'])
-            elif inspect.stack()[1][3]  == 'Sorting_statesCodeDataInAlphabeticalOrder' :
-                return data.sort_values(by=['StateCode'])
-            else:
-                return "check the method again"
+            # if inspect.stack()[1][3]  == 'Sorting_statesCensusDataInAlphabeticalOrder' :
+            return data.sort_values(by=[column])
+            # return "check the method again"
 
         except FileNotFoundError:
             FileNotCorrectException
@@ -201,52 +217,13 @@ class __StateSensusHandler(_CSVStateCensus):
         except FileExistsError :
             FileTypeNotCorrectException
 
-    def __sort_statesDataInAlphabeticalOrdertojsonfile(self,data):
-        import inspect
-
+    def __sort_statesDataInAlphabeticalOrdertojsonfile(self,data,column,to_filename):
         try:
-            '''
-            Ability to report the State
-            Census Data in a Json
-            Format from most
-            populous state to the
-            least one
-            '''
-            if inspect.stack()[1][3]  == 'to_stateCensusjsondata' :
-                return data.sort_values(by=['State'],ascending=False).reset_index().to_json(r'StateCensusJsonData.json',orient='records')
-
-            '''
-            Ability to report the
-            State Census Data in a
-            Json format from
-            Largest State by DensityPerSqKm to
-            the smallest state
-            '''
-            if inspect.stack()[1][3]  == 'Sorting_statesCensusDataOnopulationDensity' :
-                data.sort_values(by=['DensityPerSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonPopulationDensity.json',orient='records')
-                return data.sort_values(by=['DensityPerSqKm'],ascending=False)
-            '''
-            Ability to report the
-            State Census Data in a
-            Json format from
-            Largest State by Area to
-            the smallest state
-            '''
-            if inspect.stack()[1][3]  == 'Sorting_statesCensusDataOnArea' :
-                data.sort_values(by=['AreaInSqKm'],ascending=False).reset_index().to_json(r'StateCensusSortedonArea.json',orient='records')
-                return data.sort_values(by=['AreaInSqKm'],ascending=False)
-            '''
-            Ability to report the
-            StateC ode Data in a
-            Json File from most
-            population density
-            state to the least one
-            '''
-            if inspect.stack()[1][3]  == 'to_stateCodejsondata' :
-                return data.sort_values(by=['StateCode']).reset_index().to_json(r'StateCodeJsondata.json',orient='records')
-
-            else:
-                return "check the method again"
+            column_data = daoBaseClass(column).getColumn()
+            print(column_data)
+            print(type(column_data))
+            data.sort_values(by=column_data,ascending=True).reset_index().to_json(to_filename,orient='records')
+            return data.sort_values(by=column,ascending=True)
 
         except FileNotFoundError :
             raise FileNotCorrectException
@@ -254,20 +231,63 @@ class __StateSensusHandler(_CSVStateCensus):
         except FileExistsError :
             raise FileTypeNotCorrectException
 
+    def mapping(self):
+        # Read the files into two dataframes.
+        df1 = __censusdataframe
+        df2 = __statecodedataframe
+
+        def __getDuplicateColumns(df):
+            '''
+            Get a list of duplicate columns.
+            It will iterate over all the columns in dataframe and find the columns whose contents are duplicate.
+            :param df: Dataframe object
+            :return: List of columns whose contents are duplicates.
+            '''
+            duplicateColumnNames = set()
+            # Iterate over all the columns in dataframe
+            for x in range(df.shape[1]):
+                # Select column at xth index.
+                col = df.iloc[:, x]
+                # Iterate over all the columns in DataFrame from (x+1)th index till end
+                for y in range(x + 1, df.shape[1]):
+                    # Select column at yth index.
+                    otherCol = df.iloc[:, y]
+                    # Check if two columns at x 7 y index are equal
+                    if col.equals(otherCol):
+                        duplicateColumnNames.add(df.columns.values[y])
+            return list(duplicateColumnNames)
+
+        def __get_duplicateColumnNames():
+            print('Duplicate Columns are as follows')
+            for col in duplicateColumnNames:
+                print('Column name : ', col)
+
+        df3 = pd.merge(df1,df2,left_on ="State",right_on="StateName")
+        duplicateColumnNames = __getDuplicateColumns(df3)
+        # __get_duplicateColumnNames()
+        newDf = df3.drop(columns=__getDuplicateColumns(df3))
+ 
+        newDf.to_csv('abc.csv',index=False)
+        return newDf
 if __name__ == "__main__" :
 
     # if input('do u want to specify file (y or n)').__contains__(['y','Y']):
     #     correctFilepath = input('enter file name: ')
+    
     __correctFilepath = 'StateCensusData.csv'
     __wrongFilepath = 'StateCode.csv'
     Sca = _CSVStateCensus()
-    # print(__StateSensusHandler.mro())
-    print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
-    # print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
-    # print(Sca.iterator(__correctFilepath))
+    # # # print(__StateSensusHandler.mro())
+    # # print(Sca.getNumberofrecordes_censusdata(__correctFilepath))
+    # # # print(Sca.getNumberofrecordes_statecode(__wrongFilepath))
+    # # # print(Sca.iterator(__correctFilepath))
     ss = __StateSensusHandler(censusfilename=__correctFilepath,codefilename=__wrongFilepath)
-    # ss.Sorting_statesCensusDataOnArea()
-    # print(ss.Sorting_statesCensusDataOnopulationDensity())
+    print(ss.Sorting_statesCensusDataOnopulationDensity())
     # print(ss.Check_statecensusurecords())
     # print(ss.Check_statecoderecords())
-    print(ss.check_recordsCountAfterSorted())
+    # print(ss.check_recordsCountAfterSorted())
+    # print(ss.mapping())
+    print(ss.to_stateCensusjsondata())
+    print(ss.to_stateCodejsondata())
+    # print(ss.Sorting_statesCensusDataInAlphabeticalOrder())
+    # print(ss.Sorting_statesCodeDataInAlphabeticalOrder())
